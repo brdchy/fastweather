@@ -2,6 +2,7 @@ import requests
 import json 
 from datetime import datetime
 from secret import WEATHER_API_KEY
+
 # Weather source 1
 def get_weather_wttr(): 
     url = f"https://wttr.in/Vladivostok?format=j1" 
@@ -41,7 +42,7 @@ def get_weather_wttr():
 
 # Weather source 2
 def get_weather_weatherapi():
-    url = f'http://api.weatherapi.com/v1/forecast.json?key={WEATHER_API_KEY}8&q=Vladivostok&days=3&aqi=no&alerts=no'
+    url = f'https://api.weatherapi.com/v1/forecast.json?key={WEATHER_API_KEY}&q=Vladivostok&days=3&aqi=no&alerts=no'
     response = requests.get(url)
     result = {}
     if response.status_code == 200:
@@ -119,4 +120,3 @@ def get_current_weather_weatherapi():
     else:
         return 0  
     
-print(get_current_weather_weatherapi())    
