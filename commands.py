@@ -42,7 +42,9 @@ def get_weather_wttr():
 
 # Weather source 2
 def get_weather_weatherapi():
-    url = f'https://api.weatherapi.com/v1/forecast.json?key={WEATHER_API_KEY}&q=Vladivostok&days=3&aqi=no&alerts=no'
+    latitude = 43.02632103759889
+    longitude = 131.89011940838617
+    url = f'https://api.weatherapi.com/v1/forecast.json?key={WEATHER_API_KEY}&q={latitude},{longitude}&days=3&aqi=no&alerts=no'
     response = requests.get(url)
     result = {}
     if response.status_code == 200:
@@ -99,7 +101,9 @@ def get_current_weather_wttr():
         return 0
     
 def get_current_weather_weatherapi():
-    url = f'http://api.weatherapi.com/v1/forecast.json?key={WEATHER_API_KEY}&q=Vladivostok&days=3&aqi=no&alerts=no'
+    latitude = 43.02632103759889
+    longitude = 131.89011940838617
+    url = f'http://api.weatherapi.com/v1/current.json?key={WEATHER_API_KEY}&q={latitude},{longitude}&days=3&aqi=no&alerts=no'
     response = requests.get(url)
     if response.status_code == 200:
         data = response.json()['current']
@@ -120,3 +124,4 @@ def get_current_weather_weatherapi():
     else:
         return 0  
     
+print(get_current_weather_weatherapi())    
