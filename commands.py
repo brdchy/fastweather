@@ -78,27 +78,26 @@ def get_weather_weatherapi():
 def get_current_weather_wttr(): 
     url = f"https://wttr.in/Vladivostok?format=j1" 
     response = requests.get(url) 
-    result = {}
     if response.status_code == 200: 
         data = response.json()['current_condition'][0]
         local_obs_datetime = datetime.strptime(data["localObsDateTime"], "%Y-%m-%d %I:%M %p")
         local_obs_datetime_24h = local_obs_datetime.strftime("%Y-%m-%d %H:%M")
         result = {
-            "Дата/Время": local_obs_datetime_24h,
-            "Температура": f"{data['temp_C']}",
-            "Ощущается как": f"{data['FeelsLikeC']}",
-            "Описание": data["weatherDesc"][0]["value"],
-            "Влажность": f"{data['humidity']}",
-            "Скорость ветра": f"{data['windspeedKmph']}",
-            "Направление ветра": data["winddir16Point"],
-            "Давление": f"{data['pressure']}",
-            "Осадки": f"{data['precipMM']}",
-            "UV-индекс": data["uvIndex"],
-            "Источник": "wttr.in"
+            "date_time": local_obs_datetime_24h,
+            "temperature": float(data['temp_C']),
+            "feels_like": float(data['FeelsLikeC']),
+            "description": data["weatherDesc"][0]["value"],
+            "humidity": float(data['humidity']),
+            "wind_speed": float(data['windspeedKmph']),
+            "wind_direction": data["winddir16Point"],
+            "pressure": float(data['pressure']),
+            "precipitation": float(data['precipMM']),
+            "uv_index": float(data["uvIndex"]) if data["uvIndex"] else None,
+            "source": "wttr.in"
         }
         return result
     else: 
-        return 0
+        return None
     
 def get_current_weather_weatherapi():
     latitude = 43.02632103759889
@@ -108,20 +107,19 @@ def get_current_weather_weatherapi():
     if response.status_code == 200:
         data = response.json()['current']
         result = {
-            "Дата/Время": data["last_updated"],
-            "Температура": f"{data['temp_c']}",
-            "Ощущается как": f"{data['feelslike_c']}",
-            "Описание": data["condition"]["text"],
-            "Влажность": f"{data['humidity']}%",
-            "Скорость ветра": f"{data['wind_kph']}",
-            "Направление ветра": data["wind_dir"],
-            "Давление": f"{data['pressure_mb']}",
-            "Осадки": f"{data['precip_mm']}",
-            "UV-индекс": data["uv"],
-            "Источник": "Weather API"
+            "date_time": data["last_updated"],
+            "temperature": float(data['temp_c']),
+            "feels_like": float(data['feelslike_c']),
+            "description": data["condition"]["text"],
+            "humidity": float(data['humidity']),
+            "wind_speed": float(data['wind_kph']),
+            "wind_direction": data["wind_dir"],
+            "pressure": float(data['pressure_mb']),
+            "precipitation": float(data['precip_mm']),
+            "uv_index": float(data["uv"]) if data["uv"] else None,
+            "source": "Weather API"
         }
         return result
     else:
-        return 0  
+        return None
     
-print(get_current_weather_weatherapi())    

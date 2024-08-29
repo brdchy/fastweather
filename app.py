@@ -3,7 +3,33 @@ from contextlib import asynccontextmanager
 import asyncio
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from commands import *
+from commands import get_current_weather_wttr, get_current_weather_weatherapi
+from database import SessionLocal, engine
+from models import Base, WeatherLookups
 
+Base.metadata.create_all(bind=engine)
+
+app = FastAPI()
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+async def save_weather_data_to_db():
+    db = next(get_db())
+    weather_data1 = get_current_weather_wttr()
+    weather_data2 = get_current_weather_weatherapi()
+    if weather_data1:
+        db_weather1 = WeatherLookups(**weather_data1)
+        db.add(db_weather1)
+    if weather_data2:
+        db_weather2 = WeatherLookups(**weather_data2)
+        db.add(db_weather2)
+    db.commit()
+    
 weather_data1 = None
 weather_data2 = None
 
@@ -42,8 +68,10 @@ async def retry_fetch_weather_data2():
 async def lifespan(app: FastAPI):
     scheduler = AsyncIOScheduler()
     scheduler.add_job(fetch_weather_data, 'interval', hours=6)
+    scheduler.add_job(save_weather_data_to_db, 'interval', hours=1)
     scheduler.start()
     await fetch_weather_data()
+    await save_weather_data_to_db()
     yield
     scheduler.shutdown()
 
@@ -75,4 +103,4 @@ async def current_weather():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="192.168.0.7", port=6565)
+    uvicorn.run(app, host="10.61.36.12", port=6565)
