@@ -5,7 +5,8 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from commands import *
 from commands import get_current_weather_wttr, get_current_weather_weatherapi
 from database import SessionLocal, engine
-from models import Base, WeatherLookups
+from models import Base, WeatherLookups, WeatherForecast
+from sqlalchemy.orm import Session
 
 Base.metadata.create_all(bind=engine)
 
@@ -45,6 +46,44 @@ async def fetch_weather_data():
     except Exception as e:
         print(f"Error fetching weather data from source 2: {e}")
         asyncio.create_task(retry_fetch_weather_data2())
+
+async def fetch_weather_data():
+    global weather_data1, weather_data2
+    db: Session = next(get_db())  
+    try:
+        db.query(WeatherForecast).delete()
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        print(f"Error clearing weather_forecast table: {e}")
+        return
+    try:
+        weather_data1 = await asyncio.to_thread(get_weather_wttr)
+    except Exception as e:
+        print(f"Error fetching weather data from source 1: {e}")
+        asyncio.create_task(retry_fetch_weather_data1())
+    try:
+        weather_data2 = await asyncio.to_thread(get_weather_weatherapi)
+    except Exception as e:
+        print(f"Error fetching weather data from source 2: {e}")
+        asyncio.create_task(retry_fetch_weather_data2())
+
+    if weather_data1:
+        for date, hours in weather_data1.items():
+            for hour_data in hours:
+                db_weather = WeatherForecast(**hour_data)
+                db.add(db_weather)
+    if weather_data2:
+        for date, hours in weather_data2.items():
+            for hour_data in hours:
+                db_weather = WeatherForecast(**hour_data)
+                db.add(db_weather)
+
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        print(f"Error committing weather data to database: {e}")
 
 async def retry_fetch_weather_data1():
     await asyncio.sleep(900) 

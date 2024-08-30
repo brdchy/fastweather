@@ -2,6 +2,7 @@ import requests
 import json 
 from datetime import datetime
 from secret import WEATHER_API_KEY
+from weather_description import categorize_weather_description
 
 # Weather source 1
 def get_weather_wttr(): 
@@ -22,17 +23,17 @@ def get_weather_wttr():
                 datetime_str = f"{date} {times[time_index]}"
                 time_index = (time_index + 1) % len(times)
                 formatted_result = { 
-                            "Дата/Время": datetime_str,   
-                            "Температура": float(weather_data["tempC"]), 
-                            "Ощущается как": float(weather_data["FeelsLikeC"]), 
-                            "Описание": weather_data["weatherDesc"][0]["value"], 
-                            "Влажность": int(weather_data["humidity"]), 
-                            "Скорость ветра": int(weather_data["windspeedKmph"]), 
-                            "Направление ветра": weather_data["winddir16Point"], 
-                            "Давление": int(weather_data["pressure"]), 
-                            "Осадки": float(weather_data["precipMM"]), 
-                            "UV-индекс": int(weather_data["uvIndex"]), 
-                            "Источник": "wttr.in" 
+                            "date_time": datetime_str,   
+                            "temperature": float(weather_data["tempC"]), 
+                            "feels_like": float(weather_data["FeelsLikeC"]), 
+                            "description": categorize_weather_description(weather_data["weatherDesc"][0]["value"]), 
+                            "humidity": int(weather_data["humidity"]), 
+                            "wind_speed": int(weather_data["windspeedKmph"]), 
+                            "wind_direction": weather_data["winddir16Point"], 
+                            "pressure": int(weather_data["pressure"]), 
+                            "precipitation": float(weather_data["precipMM"]), 
+                            "uv_index": int(weather_data["uvIndex"]), 
+                            "source": "wttr.in" 
                         } 
                 result[date].append(formatted_result) 
         return result
@@ -58,17 +59,17 @@ def get_weather_weatherapi():
                 hour = int(weather_data["time"].split()[1].split(':')[0])
                 if hour % 3 == 0:
                     formatted_result = {
-                        "Дата/Время": weather_data["time"]+':00',
-                        "Температура": weather_data["temp_c"],
-                        "Ощущается как": weather_data["feelslike_c"],
-                        "Описание": weather_data["condition"]["text"].strip(),
-                        "Влажность": weather_data["humidity"],
-                        "Скорость ветра": weather_data["wind_kph"],
-                        "Направление ветра": weather_data["wind_dir"],
-                        "Давление": weather_data["pressure_mb"],
-                        "Осадки": weather_data["precip_mm"],
-                        "UV-индекс": weather_data["uv"],
-                        "Источник": "WeatherAPI"
+                        "date_time": weather_data["time"]+':00',
+                        "temperature": weather_data["temp_c"],
+                        "feels_like": weather_data["feelslike_c"],
+                        "description": categorize_weather_description(weather_data["condition"]["text"].strip()),
+                        "humidity": weather_data["humidity"],
+                        "wind_speed": weather_data["wind_kph"],
+                        "wind_direction": weather_data["wind_dir"],
+                        "pressure": weather_data["pressure_mb"],
+                        "precipitation": weather_data["precip_mm"],
+                        "uv_index": weather_data["uv"],
+                        "source": "Weather API"
                     }
                     result[date].append(formatted_result)
         return result
@@ -86,7 +87,7 @@ def get_current_weather_wttr():
             "date_time": local_obs_datetime_24h,
             "temperature": float(data['temp_C']),
             "feels_like": float(data['FeelsLikeC']),
-            "description": data["weatherDesc"][0]["value"],
+            "description": categorize_weather_description(data["weatherDesc"][0]["value"]),
             "humidity": float(data['humidity']),
             "wind_speed": float(data['windspeedKmph']),
             "wind_direction": data["winddir16Point"],
@@ -110,7 +111,7 @@ def get_current_weather_weatherapi():
             "date_time": data["last_updated"],
             "temperature": float(data['temp_c']),
             "feels_like": float(data['feelslike_c']),
-            "description": data["condition"]["text"],
+            "description": categorize_weather_description(data["condition"]["text"]),
             "humidity": float(data['humidity']),
             "wind_speed": float(data['wind_kph']),
             "wind_direction": data["wind_dir"],

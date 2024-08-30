@@ -20,3 +20,23 @@ class WeatherLookups(WeatherLookupsCreate):
 
     class Config:
         orm_mode = True
+
+class WeatherForecastCreate(BaseModel):
+    date_time: datetime
+    temperature: float
+    feels_like: float
+    description: str
+    humidity: float
+    wind_speed: float
+    wind_direction: str
+    pressure: float
+    precipitation: float
+    uv_index: float = None
+    source: str
+
+class WeatherForecast(WeatherForecastCreate):
+    id: int
+    created_at: datetime
+
+    class Config:
+        orm_mode = True        
