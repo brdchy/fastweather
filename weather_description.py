@@ -49,4 +49,4 @@ weather_dict = {
 }
 
 def categorize_weather_description(description):
-    return weather_dict.get(description, "Неизвестно")
+    return weather_dict.get(description.strip(), "Неизвестно")
